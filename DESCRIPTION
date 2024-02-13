@@ -1,0 +1,11 @@
+Package: eenvlp
+Type: Package
+Title: Enhanced Response Envelope
+Version: 1.0.0
+Date: 2024-02-12
+Author: Oh-Ran Kwon <kwon0085@umn.edu>, Hui Zou <hzou@stat.umn.edu>
+Maintainer: Oh-Ran Kwon <kwon0085@umn.edu>
+Description: This package provides the implementation of the enhanced response envelope. It gives you the enhanced envelope estimator for multivariate linear regression problems. 
+Depends: R (>= 3.5.0)
+License: GPL-2
+NeedsCompilation: no
