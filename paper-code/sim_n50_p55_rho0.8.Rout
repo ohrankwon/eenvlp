@@ -1,0 +1,26 @@
+
+ General information 
+   n    p  p_n  rho 
+50.0 55.0  1.1  0.8 
+
+ Prediction risk 
+    risk_Eenv-u_fix risk_Env-u_fix risk_Eenv-u_chosen risk_Env-u_chosen
+ave            4.66          66.89               5.12             14.55
+se             0.11           2.77               0.15              0.36
+    risk_Ridge
+ave       5.54
+se        0.11
+
+ Freq table of chosen u from enhanced env
+ 1  2  3 
+ 4 70 26 
+
+ Freq table of chosen u from env
+ 0  1  2 
+52 45  3 
+
+ Bias Squared 
+   Bias2_Eenv-u_fix     Bias2_Env-u_fix Bias2_Eenv-u_chosen  Bias2_Env-u_chosen 
+               2.36                1.53                2.38                7.57 
+        Bias2_Ridge 
+               3.15 
