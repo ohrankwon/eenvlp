@@ -1,4 +1,4 @@
-This files contains the code for reproducing results in the paper:
+This file contains the code for reproducing results in the paper:
 
   “Enhanced Response Envelope via Envelope Regularization”
 
