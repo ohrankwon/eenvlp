@@ -1,7 +1,7 @@
-library(devtools)
-devtools::install_github("ohrankwon/eenvlp")
 library(eenvlp)
 library(MASS)
+library(pls)
+library(Renvlp)
 
 # Set-ups
 args <- commandArgs(trailingOnly = TRUE)
@@ -68,9 +68,18 @@ risk_eenvlp <- function(m, true.beta, true.SigmaX) {
   return( output )
 }
 
+risk_beta <- function(beta, true.beta, true.SigmaX) {
+
+  alp.true <- t(beta) - t(true.beta)
+
+  alpha.true <- t(alp.true) %*% true.SigmaX %*% alp.true
+
+  return( sum(diag(alpha.true)) )
+}
+
 # Results (risks, chosen u, bias) will be saved 
 result = list()
-result[[1]] = matrix(NA,num.iter,7)
+result[[1]] = matrix(NA,num.iter,9)
 result[[2]] = list(n=n, p=p, p_n=p/n, rho=rho)
 
 cum_bias = list()
@@ -91,7 +100,9 @@ for(seed in 1:num.iter){
   Y <- as.matrix(Y)
   r <- dim(Y)[2]
   
-  # Finding tuning parameters using 10-fold cv 
+  #----- For eenv, env, and ridge
+  
+  # Finding tuning parameters using 10-fold cv
   cv.index = sample(n,n)
   lambda.seq = 10^(seq(1, -1, length.out=100))
 
@@ -134,13 +145,40 @@ for(seed in 1:num.iter){
   PE_Eenv_u_chosen = risk_eenvlp(eenvlp::eenvlp(X,Y,u=cv.pe.eenv.min[1]-1,lamb=lambda.seq[cv.pe.eenv.min[2]]), true.beta=beta, true.SigmaX=SigmaX)
   PE_Env_u_chosen = risk_eenvlp(eenvlp::eenvlp(X,Y,u=cv.pe.env.min[1]-1,lamb=small.lamb), true.beta=beta, true.SigmaX=SigmaX)
   PE_Ridge = risk_eenvlp(eenvlp::eenvlp(X,Y,u=r,lamb=lambda.seq[which.min(cv.pe.lamb.3)]), true.beta=beta, true.SigmaX=SigmaX)
+  
+  #----- For PLSR and Adhoc env
 
+  # PLSR
+  pls.mod = plsr(Y~X,validation="CV",segments=10)
+  pls.rmsep = RMSEP(pls.mod)$val[1,,]
+  pls.num.comp = which.min(colSums(pls.rmsep^2)) - 1
+  if(pls.num.comp>=1){
+      beta.pls = pls.mod$coefficients[,,pls.num.comp]
+      PE_PLS = risk_beta(t(beta.pls), true.beta=beta, true.SigmaX=SigmaX)
+    } else {
+      PE_PLS = risk_eenvlp(eenvlp::eenvlp(X,Y,u=0,lamb=0), true.beta=beta, true.SigmaX=SigmaX)[[1]] # If pls.num.comp = 0, becoming a mean model.
+    }
+    
+  # Adhoc Envelope
+  pca <- prcomp(data.frame(X),retx=FALSE)
+  n.pca = which(summary(pca)[[5]][3,]>=0.975)[1] ## 97.5 in the original paper
+  n.pca = min(c(n.pca,floor(dim(X)[1])-r-1))
+  X.pca <- predict(pca, newdata=data.frame(X))[,1:n.pca] ## which is (svd(X)$u%*%diag(svd(X)$d))[,1:n.pca]
+  list.fit = stenv(X.pca, Y, q=n.pca, u=2)
+  #beta.pca <- t(list.fit$beta) %*% t(svd(X)$v)[1:n.pca,]
+  beta.pca <- t(list.fit$beta) %*% t(pca[[2]])[1:n.pca,]
+  PE_Adhoc <- risk_beta(beta.pca, true.beta=beta, true.SigmaX=SigmaX)
+  
+  #----- Save prediction risks
+  
   result[[1]][seed,] = c(
     PE_Eenv_u_fix[[1]],
     PE_Env_u_fix[[1]],
     PE_Eenv_u_chosen[[1]],
     PE_Env_u_chosen[[1]],
     PE_Ridge[[1]],
+    PE_PLS,
+    PE_Adhoc,
     cv.pe.eenv.min[1]-1,
     cv.pe.env.min[1]-1
   )
@@ -150,11 +188,10 @@ for(seed in 1:num.iter){
   cum_bias[[3]] =  cum_bias[[3]] + PE_Eenv_u_chosen[[2]]
   cum_bias[[4]] =  cum_bias[[4]] + PE_Env_u_chosen[[2]]
   cum_bias[[5]] =  cum_bias[[5]] + PE_Ridge[[2]]
-
 }
 
 # Combining results
-colnames(result[[1]]) = c("risk_Eenv-u_fix", "risk_Env-u_fix", "risk_Eenv-u_chosen", "risk_Env-u_chosen", "risk_Ridge", "u_Eenv-u_chosen", "u_Env-u_chosen")
+colnames(result[[1]]) = c("risk_Eenv-u_fix", "risk_Env-u_fix", "risk_Eenv-u_chosen", "risk_Env-u_chosen", "risk_Ridge", "risk_PLS", "risk_Adhoc", "u_Eenv-u_chosen", "u_Env-u_chosen")
 
 meanresult1 = colMeans(result[[1]])
 meanresult2 = round(meanresult1,2)
@@ -178,13 +215,13 @@ cat("\n General information \n")
 print(unlist(result[[2]]))
 
 cat("\n Prediction risk \n")
-print(tail(result[[1]][,1:5],2))
+print(tail(result[[1]][,1:7],2))
 
 cat("\n Freq table of chosen u from enhanced env")
-print(table(result[[1]][1:num.iter,6])) 
+print(table(result[[1]][1:num.iter,8]))
 
 cat("\n Freq table of chosen u from env")
-print(table(result[[1]][1:num.iter,7])) 
+print(table(result[[1]][1:num.iter,9]))
 
 cat("\n Bias Squared \n")
 print(round(unlist(bias2),2))

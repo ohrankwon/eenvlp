@@ -1,7 +1,7 @@
-library(devtools)
-
-devtools::install_github("ohrankwon/eenvlp")
 library(eenvlp)
+
+library(pls)
+library(Renvlp)
 
 data(cereal)
 
@@ -13,10 +13,14 @@ n = dim(Y)[1]
 
 list.prederr = list(fit.eenv = c(),
                     fit.env = c(),
-                    fit.ridge = c())
+                    fit.ridge = c(),
+                    fit.adhocenv = c(),
+                    fit.pls = c())
 list.fit = list(fit.eenv = c(),
                     fit.env = c(),
-                    fit.ridge = c())
+                    fit.ridge = c(),
+                    fit.adhocenv = c(),
+                    fit.pls = c())
 
 for(rep.num in 1:n){
   
@@ -29,6 +33,11 @@ for(rep.num in 1:n){
   X.test <- X[rep.num, ]
   Y.test <- Y[rep.num, ]
 
+  X.train = scale(X.train, center=TRUE, scale=TRUE)
+  X.test = scale(matrix(X.test,1,dim(X)[2]), center=attributes(X.train)$`scaled:center`, scale=attributes(X.train)$`scaled:scale`)
+  
+  #----- For eenv, env, and ridge
+  
   lambda.seq = 10^(seq(-1, -7, length.out=20))
   u.seq = c(0:r)
   ind.cv = sample(n-1, n-1)
@@ -63,7 +72,38 @@ for(rep.num in 1:n){
     #sprederr <- apply(resi, 1, function(x) sum(x ^ 2))
     list.prederr[[ind.method]] <- c(list.prederr[[ind.method]], (sum(resi^2)/r) ) ## mean squared error
   }
+
+  #----- For PLSR and Adhoc env
   
+  # Adhoc envelope
+  pca <- prcomp(data.frame(X)[-rep.num,])
+  n.pca = which(summary(pca)[[6]][3,]>=0.995)[1]
+  X.train.pca <- predict(pca, newdata=data.frame(X)[-rep.num,])[,1:n.pca]
+  X.test.pca <- predict(pca, newdata=data.frame(X)[rep.num,])[,1:n.pca]
+  
+  cv.u.env = matrix(NA,n.pca+1,r+1)
+  for(u.dim in c(0:r)){
+    for(q.dim in c(0:n.pca)){
+      cv.u.env[(q.dim+1),(u.dim+1)] = cv.stenv(X.train.pca, Y.train, q=q.dim, u=u.dim, m=dim(X)[1]-2, nperm=1)
+    }
+  }
+  
+  chosen.qu = which(cv.u.env==min(cv.u.env), arr.ind=T)-1
+  list.fit[[4]] = stenv(X.train.pca, Y.train, q=chosen.qu[1], u=chosen.qu[2])
+
+  betahat <- t(list.fit[[4]]$beta)
+  muhat <- list.fit[[4]]$mu
+  resi <- as.matrix(Y.test - matrix(1, 1, 1) %*% t(muhat) - t(as.matrix(X.test.pca)) %*% t(betahat))
+  sprederr <- apply(resi, 1, function(x) sum(x ^ 2))
+  list.prederr[[4]] <- c(list.prederr[[ind.method]], (sprederr/r) )
+  
+  # PLSR
+  pls.mod = plsr(Y.train~X.train,validation="CV",segments=dim(X)[1]-2)
+  pls.rmsep = RMSEP(pls.mod)$val[1,,] # if [1,,], CV using root mean squared error of prediction (RMSE)
+  pls.num.comp = which.min(colSums(pls.rmsep^2)) - 1
+  pls.pred = predict(pls.mod,ncomp=pls.num.comp,newdata=matrix(X.test,1,length(X.test)),type="response")
+  list.prederr[[5]] <- c(list.prederr[[5]], sum((pls.pred[,,1]-Y.test)^2)/r )
+
 }
 
 ## Prediction errors

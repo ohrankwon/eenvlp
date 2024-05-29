@@ -7,9 +7,9 @@
     risk_Eenv-u_fix risk_Env-u_fix risk_Eenv-u_chosen risk_Env-u_chosen
 ave            1.56           1.64               1.67              1.86
 se             0.10           0.10               0.10              0.12
-    risk_Ridge
-ave       1.97
-se        0.08
+    risk_Ridge risk_PLS risk_Adhoc
+ave       1.97     2.45       1.64
+se        0.08     0.12       0.10
 
  Freq table of chosen u from enhanced env
  1  2  3 
