@@ -1,6 +1,6 @@
 This file contains the code for reproducing results in the paper:
 
-  “Enhanced Response Envelope via Envelope Regularization”
+Oh-Ran Kwon and Hui Zou (2024) **Enhanced Response Envelope via Envelope Regularization**, *Journal of the American Statistical Association*, 1-22. DOI: [10.1080/01621459.2024.2368844](https://doi.org/10.1080/01621459.2024.2368844)
 
 ## Structure
 
