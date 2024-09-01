@@ -1,0 +1,10 @@
+pandoc: 3.1.11
+pkgdown: 2.1.0
+pkgdown_sha: ~
+articles:
+  overview: overview.html
+  tutorial: tutorial.html
+last_built: 2024-09-01T02:19Z
+urls:
+  reference: https://ohrankwon.github.io/eenvlp/reference
+  article: https://ohrankwon.github.io/eenvlp/articles
