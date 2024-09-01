@@ -1,0 +1,45 @@
+url: https://ohrankwon.github.io/eenvlp/
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+navbar:
+  structure:
+    left:
+    - Introduction
+    - Tutorial
+    - reference
+    right: github
+  components:
+    Introduction:
+      text: Introduction
+      href: articles/overview.html  
+    Tutorial:
+      text: Tutorial
+      href: articles/tutorial.html
+    reference:
+      text: Reference
+      href: reference/index.html
+      
+repo:
+  url:
+    home: https://github.com/ohrankwon/eenvlp/
+    source: https://github.com/ohrankwon/eenvlp/
+    
+authors:
+  Oh-Ran Kwon:
+    href: http://ohrankwon.com/
+    
+reference:
+- title: Primary functions
+  desc: >
+  contents:
+    - eenvlp
+    - pred_eenvlp
+    - cv_eenvlp
+
+- title: Datasets
+  desc: >
+  contents:
+    - cereal
+

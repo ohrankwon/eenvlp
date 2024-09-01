@@ -1,0 +1,125 @@
+---
+title: "Tutorial on the eenvlp R package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+This tutorial introduces the `eenvlp` R package, designed for multivariate regression: 
+$$
+  y = B x + \epsilon,
+$$
+where:
+
+* $y\in\mathbb R^r$ is the vector of response variables,
+
+* $x\in\mathbb R^p$ is the vector of predictor variables,
+
+* $B\in\mathbb R^{r\times p}$ is the unknown coefficient matrix, and
+
+* $\epsilon$ represents the error term.  
+
+The `eenvlp` package is useful in both low- and high-dimensional scenarios, whether the number of predictors $p$ is smaller or larger than the number of observations $n$.
+
+In this tutorial, we will use the `eenvlp` package to analyze the cereal dataset and predict its chemical properties based on spectroscopy data.
+
+To get started, load the `eenvlp` package into your R session:
+```{r, message=FALSE, warning=FALSE}
+library(eenvlp)
+```
+
+## Data Overview
+
+We will use the `cereal` dataset, which includes measurements of two chemical properties (starch and ash) along with infrared spectroscopy predictors.
+
+#### Load and Inspect the Dataset
+First, let's load the dataset and inspect its structure to understand the dimensions of our data:
+```{r, hold=TRUE}
+data(cereal) # load data
+n <- nrow(cereal$x) # Number of observations
+r <- ncol(cereal$y) # Number of response variables
+p <- ncol(cereal$x) # Number of predictors
+```
+```{r, echo=FALSE}
+cat("n", n, "\n")
+cat("r:", r, "\n")
+cat("p:", p, "\n")
+```
+
+The `cereal` dataset consists of 15 cereal samples, each with 145 infrared spectra (predictors) and 2 chemical properties (responses). This high-dimensional setting is ideal for demonstrating the capabilities of the `eenvlp` package.
+
+#### Goal -- Prediction Task
+Our goal is to use the enhanced envelope estimator to predict the chemical properties for the first cereal sample. We will split the dataset into a training set and a test set:
+```{r}
+# Define training and test sets
+X_test <- cereal$x[1,] # The first observation as the test set
+Y_test <- cereal$y[1,]
+X_train <- cereal$x[-1,] # The remaining observations as the training set
+Y_train <- cereal$y[-1,]
+```
+
+## Model Fitting -- Enhanced Envelope Estimator
+To fit the enhanced envelope estimator, we will use cross-validation to select the optimal tuning parameters, $\lambda$ (regularization parameter) and $u$ (dimension of the envelope subspace).
+
+#### Define Sequences for Tuning Parameters
+We begin by defining sequences for $\lambda$ and $u$:
+```{r}
+lambda.seq = 10^(seq(3, -3, length.out=20)) # Sequence of lambda values
+u.seq = c(1:r) # Sequence of u values
+cv.lamb.env = matrix(NA,length(lambda.seq),length(u.seq))
+```
+
+#### Cross-Validation for Parameter Selection
+Next, we perform cross-validation to find the optimal values for $\lambda$ and $u$: 
+
+```{r, hold=TRUE}
+set.seed(11111) # Set a seed for reproducibility
+  for(i in 1:length(lambda.seq)){
+    for(j in 1:length(u.seq)){
+      cv.lamb.env[i,j] <- cv_eenvlp(X_train, Y_train, u=u.seq[j], lamb=lambda.seq[i], m=10, nperm=1)
+    }
+  }  
+
+# Identify the optimal parameters
+chosen <- which(cv.lamb.env == min(cv.lamb.env), arr.ind=TRUE)
+chosen.lamb <- lambda.seq[chosen[1]]
+chosen.u <- u.seq[chosen[2]]
+```
+```{r, echo=FALSE}
+cat("Optimal lambda:", chosen.lamb, "\n")
+cat("Optimal u:", chosen.u, "\n")
+```
+
+#### Fit the `eenvlp` Model Using Optimal Parameters
+
+With the optimal parameters determined, we fit the `eenvlp` model:
+
+```{r}
+fit_eenvlp <- eenvlp(X_train, Y_train, u = chosen.u, lamb = chosen.lamb)
+```
+
+## Prediction on Test Data
+We use the fitted model to predict the chemical properties for the test observation:
+```{r}
+predict_eenvlp <- pred_eenvlp(fit_eenvlp, X_test)
+```
+
+#### Calculate Prediction Error 
+Finally, we calculate the prediction error to evaluate the model's performance:
+```{r, hold=TRUE}
+prediction_error <- (predict_eenvlp - Y_test)^2
+```
+```{r, echo=FALSE}
+cat("Prediction error:", prediction_error, "\n")
+```
