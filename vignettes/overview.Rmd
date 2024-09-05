@@ -71,6 +71,8 @@ where:
 $$
 \rho(\eta, \Omega) = \text{tr} (\eta^T\Omega^{-1}\eta).
 $$
+
 This regularization term penalizes large values in the coefficient matrix $\eta$ adjusted by $\Omega^{-1/2}$, thereby improving model stability and reducing overfitting.
+
 
 By allowing flexibility in selecting the regularization parameter $\lambda$, the enhanced envelope estimator can achieve better prediction performance than the original envelope estimator. Moreover, this regularization enables the model to handle cases where the number of predictors $p$ exceeds the number of observations $n$. The original envelope estimator cannot be applied directly in such high-dimensional situations, whereas the enhanced version, with its regularization, can effectively manage these cases.
