@@ -138,13 +138,14 @@ is a regularization parameter, and</p></li>
 is the regularization term defined as:
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>η</mi><mo>,</mo><mi>Ω</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mtext mathvariant="normal">tr</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>η</mi><mi>T</mi></msup><msup><mi>Ω</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mi>η</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \rho(\eta, \Omega) = \text{tr} (\eta^T\Omega^{-1}\eta).
-</annotation></semantics></math> This regularization term penalizes
-large values in the coefficient matrix
+</annotation></semantics></math></p></li>
+</ul>
+<p>This regularization term penalizes large values in the coefficient
+matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
 adjusted by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>Ω</mi><mrow><mo>−</mo><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msup><annotation encoding="application/x-tex">\Omega^{-1/2}</annotation></semantics></math>,
-thereby improving model stability and reducing overfitting.</p></li>
-</ul>
+thereby improving model stability and reducing overfitting.</p>
 <p>By allowing flexibility in selecting the regularization parameter
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>,
 the enhanced envelope estimator can achieve better prediction
