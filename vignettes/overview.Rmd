@@ -36,7 +36,7 @@ where:
 
 * $\epsilon$ represents the error vector.  
 
-The **envelope model** improves this basic framework by identifying a subspace of the response vector that is unaffected by changes in the predictor vector. Specifically, it finds a subspace $\mathcal E \subseteq \mathbb{R}^r$ that separates the "material" variation (the part that is important for identifying the relationship of $y$ with $x$) from the "immaterial" variation (the part that does not affect this relationship). This separation reduces noise, leading to more accurate and efficient estimation and prediction.
+The **envelope model** improves this basic framework by identifying a subspace of the response vector that is unaffected by changes in the predictor vector. Specifically, it finds a subspace, called the envelope subspace, that separates the "material" variation (the part that is important for identifying the relationship of $y$ with $x$) from the "immaterial" variation (the part that does not affect this relationship). This separation reduces noise, leading to more accurate and efficient estimation and prediction.
 
 By incorporating the envelope concept, the multivariate linear model can be reformulated as follows, which represents the envelope model:
 $$
