@@ -21,5 +21,5 @@ Please see [Overview](https://ohrankwon.github.io/eenvlp/articles/overview.html)
 Open an `R` prompt. Then, type the following commands:
 
     library(devtools)
-    devtools::install_github("ohrankwon/eenvlp")
+    install_github("ohrankwon/eenvlp")
     library(eenvlp)
