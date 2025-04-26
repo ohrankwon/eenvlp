@@ -15,7 +15,7 @@ pred_eenvlp <- function(m, Xnew) {
   Xnew <- as.matrix(Xnew)
   
   if( is.null(m$X.scale) ) {
-    Xnew <- scale(Xnew, center = m$X.center)
+    Xnew <- scale(Xnew, center = m$X.center, scale = FALSE)
   } else {
     Xnew <- scale(Xnew, center = m$X.center, scale = m$X.scale)
   }
